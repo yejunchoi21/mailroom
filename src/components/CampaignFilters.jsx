@@ -1,6 +1,8 @@
 import { CAMPAIGN_STATUSES } from '../data/sampleCampaigns.js'
 import './CampaignFilters.css'
 
+const STATUS_OPTIONS = ['All', ...CAMPAIGN_STATUSES]
+
 function CampaignFilters({
   searchQuery,
   onSearchChange,
@@ -9,7 +11,7 @@ function CampaignFilters({
 }) {
   return (
     <div className="campaign-filters">
-      <div className="campaign-filters__field">
+      <div className="campaign-filters__field campaign-filters__field--search">
         <label htmlFor="campaign-search" className="campaign-filters__label">
           Search campaigns
         </label>
@@ -24,23 +26,31 @@ function CampaignFilters({
         />
       </div>
 
-      <div className="campaign-filters__field">
-        <label htmlFor="campaign-status" className="campaign-filters__label">
+      <div className="campaign-filters__field campaign-filters__field--status">
+        <p id="campaign-status-label" className="campaign-filters__label">
           Status
-        </label>
-        <select
-          id="campaign-status"
-          className="campaign-filters__select"
-          value={statusFilter}
-          onChange={(event) => onStatusChange(event.target.value)}
+        </p>
+        <div
+          className="campaign-filters__pills"
+          role="group"
+          aria-labelledby="campaign-status-label"
         >
-          <option value="All">All</option>
-          {CAMPAIGN_STATUSES.map((status) => (
-            <option key={status} value={status}>
-              {status}
-            </option>
-          ))}
-        </select>
+          {STATUS_OPTIONS.map((status) => {
+            const isSelected = statusFilter === status
+
+            return (
+              <button
+                key={status}
+                type="button"
+                className={`campaign-filters__pill${isSelected ? ' campaign-filters__pill--selected' : ''}`}
+                aria-pressed={isSelected}
+                onClick={() => onStatusChange(status)}
+              >
+                {status}
+              </button>
+            )
+          })}
+        </div>
       </div>
     </div>
   )

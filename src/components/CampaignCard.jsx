@@ -11,36 +11,24 @@ function formatUpdatedAt(isoDate) {
 }
 
 function CampaignCard({ campaign }) {
-  const statusClass = `campaign-card__status campaign-card__status--${campaign.status.toLowerCase()}`
+  const statusClass = `campaign-status campaign-status--${campaign.status.toLowerCase()}`
 
   return (
-    <article className="campaign-card" aria-labelledby={`campaign-${campaign.id}-name`}>
-      <div className="campaign-card__header">
-        <h2 id={`campaign-${campaign.id}-name`} className="campaign-card__name">
-          {campaign.name}
-        </h2>
+    <tr className="campaign-row">
+      <th scope="row" className="campaign-row__name">
+        {campaign.name}
+      </th>
+      <td className="campaign-row__id">{campaign.id}</td>
+      <td className="campaign-row__subject">{campaign.subject}</td>
+      <td className="campaign-row__status">
         <span className={statusClass}>{campaign.status}</span>
-      </div>
-
-      <dl className="campaign-card__meta">
-        <div className="campaign-card__row">
-          <dt>ID</dt>
-          <dd>{campaign.id}</dd>
-        </div>
-        <div className="campaign-card__row">
-          <dt>Subject</dt>
-          <dd>{campaign.subject}</dd>
-        </div>
-        <div className="campaign-card__row">
-          <dt>Last updated</dt>
-          <dd>
-            <time dateTime={campaign.updatedAt}>
-              {formatUpdatedAt(campaign.updatedAt)}
-            </time>
-          </dd>
-        </div>
-      </dl>
-    </article>
+      </td>
+      <td className="campaign-row__updated">
+        <time dateTime={campaign.updatedAt}>
+          {formatUpdatedAt(campaign.updatedAt)}
+        </time>
+      </td>
+    </tr>
   )
 }
 

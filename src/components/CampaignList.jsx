@@ -22,13 +22,24 @@ function CampaignList({ campaigns, onClearFilters }) {
   }
 
   return (
-    <ul className="campaign-list">
-      {campaigns.map((campaign) => (
-        <li key={campaign.id}>
-          <CampaignCard campaign={campaign} />
-        </li>
-      ))}
-    </ul>
+    <div className="campaign-table-wrap">
+      <table className="campaign-table">
+        <thead>
+          <tr>
+            <th scope="col">Name</th>
+            <th scope="col">ID</th>
+            <th scope="col">Subject</th>
+            <th scope="col">Status</th>
+            <th scope="col">Last updated</th>
+          </tr>
+        </thead>
+        <tbody>
+          {campaigns.map((campaign) => (
+            <CampaignCard key={campaign.id} campaign={campaign} />
+          ))}
+        </tbody>
+      </table>
+    </div>
   )
 }
 

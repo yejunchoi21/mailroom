@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { sampleCampaigns } from '../data/sampleCampaigns.js'
+import CampaignPreviews from '../components/CampaignPreviews.jsx'
 import CampaignFilters from '../components/CampaignFilters.jsx'
 import CampaignList from '../components/CampaignList.jsx'
 
@@ -24,6 +25,8 @@ function sortByUpdatedDesc(a, b) {
 function Campaigns() {
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('All')
+
+  const previewCampaigns = [...sampleCampaigns].sort(sortByUpdatedDesc)
 
   const filteredCampaigns = sampleCampaigns
     .filter(
@@ -53,6 +56,15 @@ function Campaigns() {
           saved.
         </p>
       </header>
+
+      <CampaignPreviews campaigns={previewCampaigns} />
+
+      <div className="page__browse">
+        <h2 className="page__browse-heading">Browse campaigns</h2>
+        <p className="page__browse-copy">
+          Search and filter the full demo list below.
+        </p>
+      </div>
 
       <CampaignFilters
         searchQuery={searchQuery}
