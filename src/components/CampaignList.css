@@ -10,7 +10,7 @@
 
 .campaign-table {
   width: 100%;
-  min-width: 40rem;
+  min-width: 48rem;
   border-collapse: collapse;
   table-layout: fixed;
 }
@@ -28,7 +28,7 @@
 }
 
 .campaign-table thead th:nth-child(1) {
-  width: 24%;
+  width: 22%;
 }
 
 .campaign-table thead th:nth-child(2) {
@@ -36,15 +36,19 @@
 }
 
 .campaign-table thead th:nth-child(3) {
-  width: 32%;
+  width: 24%;
 }
 
 .campaign-table thead th:nth-child(4) {
-  width: 14%;
+  width: 12%;
 }
 
 .campaign-table thead th:nth-child(5) {
-  width: 18%;
+  width: 14%;
+}
+
+.campaign-table thead th:nth-child(6) {
+  width: 16%;
 }
 
 .campaign-list__empty {

@@ -1,14 +1,20 @@
 import CampaignCard from './CampaignCard.jsx'
 import './CampaignList.css'
 
-function CampaignList({ campaigns, onClearFilters }) {
+function CampaignList({
+  campaigns,
+  onClearFilters,
+  onEdit,
+  onView,
+  onDelete,
+}) {
   if (campaigns.length === 0) {
     return (
       <div className="campaign-list__empty" role="status">
         <p className="campaign-list__empty-title">No campaigns match</p>
         <p className="campaign-list__empty-text">
           Try a different search term or status, or clear your filters to see
-          all demo campaigns again.
+          campaigns again.
         </p>
         <button
           type="button"
@@ -31,11 +37,18 @@ function CampaignList({ campaigns, onClearFilters }) {
             <th scope="col">Subject</th>
             <th scope="col">Status</th>
             <th scope="col">Last updated</th>
+            <th scope="col">Actions</th>
           </tr>
         </thead>
         <tbody>
           {campaigns.map((campaign) => (
-            <CampaignCard key={campaign.id} campaign={campaign} />
+            <CampaignCard
+              key={campaign.id}
+              campaign={campaign}
+              onEdit={onEdit}
+              onView={onView}
+              onDelete={onDelete}
+            />
           ))}
         </tbody>
       </table>
