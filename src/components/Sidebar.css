@@ -21,6 +21,24 @@
   color: var(--sidebar-heading);
 }
 
+.sidebar__user {
+  margin: var(--space-1) 0 0;
+  font-size: 0.8125rem;
+  color: var(--sidebar-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar__footer {
+  margin-top: auto;
+  padding-top: var(--space-4);
+}
+
+.sidebar__logout {
+  color: var(--color-text-secondary);
+}
+
 .sidebar__nav {
   flex: 1;
 }

@@ -6,6 +6,7 @@ import './CampaignEditor.css'
 function CampaignEditor({
   initialCampaign,
   readOnly = false,
+  saving = false,
   onSave,
   onCancel,
 }) {
@@ -31,9 +32,9 @@ function CampaignEditor({
       ? 'Edit draft'
       : 'New campaign'
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault()
-    if (readOnly) return
+    if (readOnly || saving) return
 
     const trimmedName = name.trim()
     if (!trimmedName) {
@@ -43,7 +44,8 @@ function CampaignEditor({
     }
 
     setNameError('')
-    const result = onSave({
+    setFormMessage('Saving…')
+    const result = await onSave({
       id: initialCampaign?.id,
       name: trimmedName,
       subject,
@@ -198,8 +200,12 @@ function CampaignEditor({
               Cancel
             </button>
             {!readOnly ? (
-              <button type="submit" className="campaign-editor__primary-btn">
-                Save draft
+              <button
+                type="submit"
+                className="campaign-editor__primary-btn"
+                disabled={saving}
+              >
+                {saving ? 'Saving…' : 'Save draft'}
               </button>
             ) : null}
           </div>

@@ -26,11 +26,20 @@ function sortByUpdatedDesc(a, b) {
 }
 
 function Campaigns() {
-  const { drafts, saveDraft, removeDraft, createEmptyDraft } = useDrafts()
+  const {
+    drafts,
+    loading,
+    saving,
+    error,
+    saveDraft,
+    removeDraft,
+    createEmptyDraft,
+  } = useDrafts()
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('All')
   const [editorState, setEditorState] = useState(null)
   const [pendingDelete, setPendingDelete] = useState(null)
+  const [actionError, setActionError] = useState('')
 
   const allCampaigns = [...drafts, ...sampleCampaigns].sort(sortByUpdatedDesc)
   const previewCampaigns = [...sampleCampaigns].sort(sortByUpdatedDesc)
@@ -49,6 +58,7 @@ function Campaigns() {
   }
 
   function openNewCampaign() {
+    setActionError('')
     setEditorState({
       campaign: createEmptyDraft(),
       readOnly: false,
@@ -56,10 +66,12 @@ function Campaigns() {
   }
 
   function openEdit(campaign) {
+    setActionError('')
     setEditorState({ campaign, readOnly: false })
   }
 
   function openView(campaign) {
+    setActionError('')
     setEditorState({ campaign, readOnly: true })
   }
 
@@ -67,17 +79,20 @@ function Campaigns() {
     setEditorState(null)
   }
 
-  function handleSave(draftInput) {
-    const result = saveDraft(draftInput)
+  async function handleSave(draftInput) {
+    const result = await saveDraft(draftInput)
     if (!result.error) {
       setEditorState(null)
     }
     return result
   }
 
-  function confirmDelete() {
+  async function confirmDelete() {
     if (!pendingDelete) return
-    removeDraft(pendingDelete.id)
+    const result = await removeDraft(pendingDelete.id)
+    if (result.error) {
+      setActionError(result.error)
+    }
     setPendingDelete(null)
   }
 
@@ -92,6 +107,7 @@ function Campaigns() {
           key={editorState.campaign.id || 'new-campaign'}
           initialCampaign={editorState.campaign}
           readOnly={editorState.readOnly}
+          saving={saving}
           onSave={handleSave}
           onCancel={closeEditor}
         />
@@ -107,14 +123,15 @@ function Campaigns() {
             Campaigns
           </h1>
           <p className="page__demo-banner" role="note">
-            Demo campaigns are sample content. Your drafts are saved in this
-            browser and stay separate from demos.
+            Demo campaigns are sample content only. Your drafts are saved to
+            your signed-in Mailroom account.
           </p>
         </div>
         <button
           type="button"
           className="page__primary-btn"
           onClick={openNewCampaign}
+          disabled={loading}
         >
           New campaign
         </button>
@@ -125,8 +142,8 @@ function Campaigns() {
       <div className="page__browse">
         <h2 className="page__browse-heading">Browse campaigns</h2>
         <p className="page__browse-copy">
-          Search and filter your drafts and demo campaigns. Scheduled and Sent
-          demos are read-only.
+          Search and filter your account drafts and demo campaigns. Scheduled
+          and Sent demos are read-only.
         </p>
       </div>
 
@@ -137,10 +154,22 @@ function Campaigns() {
         onStatusChange={setStatusFilter}
       />
 
+      {loading ? (
+        <p className="page__status" role="status">
+          Loading campaigns…
+        </p>
+      ) : null}
+
+      {error || actionError ? (
+        <p className="page__error" role="alert">
+          {error || actionError}
+        </p>
+      ) : null}
+
       <p className="page__count" aria-live="polite">
         Showing <strong>{matchLabel}</strong>
         {drafts.length > 0
-          ? ` · ${drafts.length} saved draft${drafts.length === 1 ? '' : 's'}`
+          ? ` · ${drafts.length} account draft${drafts.length === 1 ? '' : 's'}`
           : ''}
       </p>
 
@@ -155,7 +184,7 @@ function Campaigns() {
       {pendingDelete ? (
         <ConfirmDialog
           title="Delete draft?"
-          message={`“${pendingDelete.name}” will be permanently removed from this browser. This cannot be undone.`}
+          message={`“${pendingDelete.name}” will be permanently removed from your account. This cannot be undone.`}
           confirmLabel="Delete draft"
           cancelLabel="Keep draft"
           onConfirm={confirmDelete}

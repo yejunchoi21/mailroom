@@ -6,6 +6,7 @@ function SubscriberForm({
   initialSubscriber,
   onSave,
   onCancel,
+  saving = false,
   title = 'Add subscriber',
 }) {
   const nameId = useId()
@@ -18,11 +19,12 @@ function SubscriberForm({
   const [status, setStatus] = useState(initialSubscriber?.status || 'Subscribed')
   const [error, setError] = useState('')
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault()
+    if (saving) return
     setError('')
 
-    const result = onSave({
+    const result = await onSave({
       id: initialSubscriber?.id,
       name,
       email,
@@ -113,8 +115,12 @@ function SubscriberForm({
           >
             Cancel
           </button>
-          <button type="submit" className="subscriber-form__primary">
-            Save subscriber
+          <button
+            type="submit"
+            className="subscriber-form__primary"
+            disabled={saving}
+          >
+            {saving ? 'Saving…' : 'Save subscriber'}
           </button>
         </div>
       </form>

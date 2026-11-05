@@ -6,11 +6,16 @@ const NAV_ITEMS = [
   { id: 'settings', label: 'Settings' },
 ]
 
-function Sidebar({ activePage, onNavigate }) {
+function Sidebar({ activePage, onNavigate, user, onLogout }) {
   return (
     <aside className="sidebar" aria-label="Main navigation">
       <div className="sidebar__brand">
         <p className="sidebar__name">Mailroom</p>
+        {user ? (
+          <p className="sidebar__user" title={user.email}>
+            {user.name}
+          </p>
+        ) : null}
       </div>
 
       <nav className="sidebar__nav">
@@ -33,6 +38,18 @@ function Sidebar({ activePage, onNavigate }) {
           })}
         </ul>
       </nav>
+
+      {onLogout ? (
+        <div className="sidebar__footer">
+          <button
+            type="button"
+            className="sidebar__link sidebar__logout"
+            onClick={onLogout}
+          >
+            Log out
+          </button>
+        </div>
+      ) : null}
     </aside>
   )
 }

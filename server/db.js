@@ -21,7 +21,28 @@ export async function connectDb() {
   client = new MongoClient(uri)
   await client.connect()
   db = client.db(dbName)
+  await ensureIndexes(db)
   return db
+}
+
+async function ensureIndexes(database) {
+  await database.collection('users').createIndexes([
+    { key: { emailKey: 1 }, unique: true },
+  ])
+
+  await database.collection('sessions').createIndexes([
+    { key: { expiresAt: 1 }, expireAfterSeconds: 0 },
+    { key: { userId: 1 } },
+  ])
+
+  await database.collection('campaigns').createIndexes([
+    { key: { userId: 1, updatedAt: -1 } },
+  ])
+
+  await database.collection('subscribers').createIndexes([
+    { key: { userId: 1, emailKey: 1 }, unique: true },
+    { key: { userId: 1, dateAdded: -1 } },
+  ])
 }
 
 export async function pingDb() {

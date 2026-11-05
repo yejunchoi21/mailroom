@@ -2,7 +2,7 @@ import { useId, useState } from 'react'
 import { previewSubscriberCsv } from '../utils/csvImport.js'
 import './SubscriberImport.css'
 
-function SubscriberImport({ subscribers, onImport, onCancel }) {
+function SubscriberImport({ subscribers, onImport, onCancel, saving = false }) {
   const fileId = useId()
   const [preview, setPreview] = useState(null)
   const [error, setError] = useState('')
@@ -33,16 +33,24 @@ function SubscriberImport({ subscribers, onImport, onCancel }) {
     }
   }
 
-  function handleConfirmImport() {
-    if (!preview?.valid?.length) return
+  async function handleConfirmImport() {
+    if (!preview?.valid?.length || saving) return
 
-    const result = onImport(preview.valid)
-    setResultMessage(
-      `Imported ${result.added} subscriber${result.added === 1 ? '' : 's'}. ` +
-        `${result.skippedDuplicates} duplicate${result.skippedDuplicates === 1 ? '' : 's'} skipped. ` +
-        `${result.skippedUnsubscribed} unsubscribed address${result.skippedUnsubscribed === 1 ? '' : 'es'} left unchanged.`,
-    )
-    setPreview(null)
+    setBusy(true)
+    setError('')
+    try {
+      const result = await onImport(preview.valid)
+      setResultMessage(
+        `Imported ${result.added} subscriber${result.added === 1 ? '' : 's'}. ` +
+          `${result.skippedDuplicates} duplicate${result.skippedDuplicates === 1 ? '' : 's'} skipped. ` +
+          `${result.skippedUnsubscribed} unsubscribed address${result.skippedUnsubscribed === 1 ? '' : 'es'} left unchanged.`,
+      )
+      setPreview(null)
+    } catch (importError) {
+      setError(importError.message || 'Import failed.')
+    } finally {
+      setBusy(false)
+    }
   }
 
   return (
@@ -126,9 +134,9 @@ function SubscriberImport({ subscribers, onImport, onCancel }) {
           type="button"
           className="subscriber-import__primary"
           onClick={handleConfirmImport}
-          disabled={!preview?.valid?.length || busy}
+          disabled={!preview?.valid?.length || busy || saving}
         >
-          Confirm import
+          {saving || busy ? 'Importing…' : 'Confirm import'}
         </button>
       </div>
     </section>

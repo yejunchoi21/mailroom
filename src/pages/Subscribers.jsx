@@ -14,6 +14,9 @@ const dateFormatter = new Intl.DateTimeFormat(undefined, {
 function Subscribers() {
   const {
     subscribers,
+    loading,
+    saving,
+    error,
     saveSubscriber,
     removeSubscriber,
     importValidRows,
@@ -24,6 +27,7 @@ function Subscribers() {
   const [panel, setPanel] = useState(null)
   const [editing, setEditing] = useState(null)
   const [pendingDelete, setPendingDelete] = useState(null)
+  const [actionError, setActionError] = useState('')
 
   const query = searchQuery.trim().toLowerCase()
   const filtered = (
@@ -38,8 +42,8 @@ function Subscribers() {
     .slice()
     .sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded))
 
-  function handleSave(input) {
-    const result = saveSubscriber(input)
+  async function handleSave(input) {
+    const result = await saveSubscriber(input)
     if (!result.error) {
       setPanel(null)
       setEditing(null)
@@ -47,9 +51,12 @@ function Subscribers() {
     return result
   }
 
-  function confirmDelete() {
+  async function confirmDelete() {
     if (!pendingDelete) return
-    removeSubscriber(pendingDelete.id)
+    const result = await removeSubscriber(pendingDelete.id)
+    if (result.error) {
+      setActionError(result.error)
+    }
     setPendingDelete(null)
   }
 
@@ -61,7 +68,7 @@ function Subscribers() {
             Subscribers
           </h1>
           <p className="page__demo-banner" role="note">
-            Subscribers are saved in this browser for now. Manually added
+            Subscribers are saved to your signed-in account. Manually added
             contacts are labeled as test data.
           </p>
         </div>
@@ -73,6 +80,7 @@ function Subscribers() {
               setEditing(null)
               setPanel('import')
             }}
+            disabled={loading}
           >
             Import CSV
           </button>
@@ -83,6 +91,7 @@ function Subscribers() {
               setEditing(createEmptySubscriber())
               setPanel('form')
             }}
+            disabled={loading}
           >
             Add subscriber
           </button>
@@ -94,6 +103,7 @@ function Subscribers() {
           key={editing?.id || 'new-subscriber'}
           initialSubscriber={editing}
           title={editing?.name ? 'Edit subscriber' : 'Add subscriber'}
+          saving={saving}
           onSave={handleSave}
           onCancel={() => {
             setPanel(null)
@@ -105,6 +115,7 @@ function Subscribers() {
       {panel === 'import' ? (
         <SubscriberImport
           subscribers={subscribers}
+          saving={saving}
           onImport={importValidRows}
           onCancel={() => setPanel(null)}
         />
@@ -125,12 +136,24 @@ function Subscribers() {
         />
       </div>
 
+      {loading ? (
+        <p className="page__status" role="status">
+          Loading subscribers…
+        </p>
+      ) : null}
+
+      {error || actionError ? (
+        <p className="page__error" role="alert">
+          {error || actionError}
+        </p>
+      ) : null}
+
       <p className="page__count" aria-live="polite">
         Showing <strong>{filtered.length}</strong> of {subscribers.length}{' '}
         subscriber{subscribers.length === 1 ? '' : 's'}
       </p>
 
-      {filtered.length === 0 ? (
+      {filtered.length === 0 && !loading ? (
         <div className="subscribers__empty" role="status">
           <p className="subscribers__empty-title">No subscribers found</p>
           <p className="subscribers__empty-text">
@@ -204,7 +227,7 @@ function Subscribers() {
       {pendingDelete ? (
         <ConfirmDialog
           title="Delete subscriber?"
-          message={`“${pendingDelete.name}” (${pendingDelete.email}) will be removed from this browser.`}
+          message={`“${pendingDelete.name}” (${pendingDelete.email}) will be removed from your account.`}
           confirmLabel="Delete subscriber"
           cancelLabel="Keep subscriber"
           onConfirm={confirmDelete}
