@@ -1,0 +1,114 @@
+.subscriber-form {
+  margin-bottom: var(--space-6);
+  padding: var(--space-5);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.subscriber-form__header {
+  margin-bottom: var(--space-4);
+}
+
+.subscriber-form__title {
+  margin: 0 0 var(--space-2);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--color-text);
+  letter-spacing: -0.02em;
+}
+
+.subscriber-form__note {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-demo-text);
+  background: var(--color-demo-bg);
+  border: var(--border-width) solid var(--color-demo-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+}
+
+.subscriber-form__body {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.subscriber-form__field {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.subscriber-form__label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.subscriber-form__input {
+  width: 100%;
+  height: var(--control-height);
+  padding: var(--control-padding-y) var(--control-padding-x);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--control-font-size);
+}
+
+.subscriber-form__input:focus-visible {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-soft);
+}
+
+.subscriber-form__error {
+  margin: 0;
+  color: #d70015;
+  font-size: 0.8125rem;
+}
+
+.subscriber-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.subscriber-form__ghost,
+.subscriber-form__primary {
+  appearance: none;
+  height: var(--control-height);
+  padding: 0 1.1rem;
+  border-radius: var(--radius-sm);
+  font: inherit;
+  font-size: var(--control-font-size);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.subscriber-form__ghost {
+  border: var(--border-width) solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.subscriber-form__ghost:hover {
+  background: var(--color-surface-hover);
+}
+
+.subscriber-form__primary {
+  border: var(--border-width) solid var(--color-accent);
+  background: var(--color-accent);
+  color: #fff;
+}
+
+.subscriber-form__primary:hover {
+  background: var(--color-accent-hover);
+}
+
+.subscriber-form__ghost:focus-visible,
+.subscriber-form__primary:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-focus);
+  outline-offset: var(--focus-ring-offset);
+}
