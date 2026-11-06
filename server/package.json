@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "node --watch index.js",
     "start": "node index.js",
+    "test": "vitest run",
     "assign-ownership": "node scripts/assign-ownership.js",
     "verify-isolation": "node scripts/verify-isolation.js"
   },
@@ -17,11 +18,13 @@
     "express": "^5.1.0",
     "express-rate-limit": "^8.7.3",
     "mongodb": "^6.20.0",
+    "resend": "^6.37.0",
     "sanitize-html": "^2.18.1"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
     "@types/cookie-parser": "^1.4.10",
-    "@types/sanitize-html": "^2.16.2"
+    "@types/sanitize-html": "^2.16.2",
+    "vitest": "^5.1.0"
   }
 }

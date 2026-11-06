@@ -81,8 +81,9 @@ function Campaigns() {
 
   async function handleSave(draftInput) {
     const result = await saveDraft(draftInput)
-    if (!result.error) {
-      setEditorState(null)
+    if (!result.error && result.draft) {
+      // Keep the editor open on the saved campaign so test send / schedule are available.
+      setEditorState({ campaign: result.draft, readOnly: false })
     }
     return result
   }

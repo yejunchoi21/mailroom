@@ -8,6 +8,7 @@ Live campaign drafts and subscribers are stored in MongoDB and scoped to the sig
 
 - Node.js 20+
 - MongoDB running locally (or a reachable MongoDB URI)
+- A [Resend](https://resend.com) API key for test/scheduled owner emails
 
 ## Frontend
 
@@ -17,8 +18,6 @@ npm run dev
 ```
 
 The Vite dev server proxies `/api` to `http://localhost:3002`.
-
-Other frontend commands:
 
 ```bash
 npm run build
@@ -36,52 +35,62 @@ npm install
 npm run dev
 ```
 
-Default API URL: `http://localhost:3002`
-
-Health check:
-
 ```bash
-curl http://localhost:3002/api/health
+cd server
+npm test
+npm run verify-isolation
 ```
 
 ### Backend environment variables
 
-| Variable | Purpose | Example |
-|----------|---------|---------|
-| `MONGODB_URI` | MongoDB connection string | `mongodb://127.0.0.1:27017` |
-| `MONGODB_DB_NAME` | Dedicated Mailroom database | `mailroom` |
-| `PORT` | API port (keep different from PeoplesNote) | `3002` |
-| `CLIENT_ORIGIN` | Frontend origin for CORS cookies | `http://localhost:5173` |
-| `SESSION_SECRET` | Server secret for session-related hardening | long random string |
-| `SESSION_TTL_MS` | Session lifetime in ms | `604800000` |
-| `COOKIE_NAME` | HttpOnly session cookie name | `mailroom_session` |
-| `COOKIE_SECURE` | Set `true` behind HTTPS | `false` |
+| Variable | Purpose |
+|----------|---------|
+| `MONGODB_URI` / `MONGODB_DB_NAME` | Dedicated Mailroom database |
+| `PORT` | API port (default `3002`) |
+| `CLIENT_ORIGIN` | Frontend origin for CORS cookies |
+| `SESSION_SECRET` / `SESSION_TTL_MS` / `COOKIE_*` | Session cookie settings |
+| `RESEND_API_KEY` | Resend API key (server only) |
+| `RESEND_FROM_EMAIL` | Verified sender, e.g. `Mailroom <you@your-domain.com>` |
 
-### Useful backend scripts
+### Sender verification & test recipients
+
+- Verify your sending domain in the Resend dashboard: https://resend.com/domains
+- Put the verified address in `RESEND_FROM_EMAIL`
+- With an unverified/test setup, Resend typically only allows sending to your own account email (and provides addresses like `delivered@resend.dev` for provider testing)
+- Mailroom only sends test/scheduled messages to the **signed-in user's account email** in this milestone
+- Automated tests mock Resend and never send real email
+- A `202 submitted` / provider message id means Resend **accepted** the request — not that inbox delivery is confirmed
+
+### Scheduling behavior
+
+- Schedule stores date/time/timezone as a UTC instant plus a **content snapshot**
+- Delivery is owner-email only for this learning milestone
+- While the backend runs, a worker checks due schedules **once per minute**
+- Due jobs are claimed atomically (`Scheduled` → `Processing`) so overlapping ticks cannot double-claim
+- Sends use Resend idempotency keys (`schedule-send/<userId>/<scheduleId>`) to reduce duplicates (Resend keeps keys ~24 hours)
+- States: `Scheduled`, `Processing`, `Submitted`, `Failed`, `Cancelled`
+- Cancel is allowed only before processing begins
+- **No automatic retries** yet
+- **Restart:** if the process stops, due mail waits until the backend is running again; already `Submitted` sends are not resent by Mailroom; idempotency helps if a crash happened after Resend accepted but before DB update
+- Scheduling requires the backend process to remain running
+
+### Ownership migration
 
 ```bash
 cd server
-
-# Explicitly assign ownerless DB records to an account (never automatic)
 npm run assign-ownership -- --email you@example.com
 npm run assign-ownership -- --email you@example.com --dry-run
-
-# Verify two accounts cannot access each other's data
-npm run verify-isolation
 ```
 
-## Request flow
+## Request flow (send / schedule)
 
-1. Browser signs up / logs in via `POST /api/auth/signup` or `/api/auth/login`.
-2. Server creates a MongoDB session and sets an HttpOnly cookie.
-3. Server returns a CSRF token; the frontend sends it as `X-CSRF-Token` on mutating requests.
-4. Campaign and subscriber routes derive ownership from the session user id only.
-5. UI state updates only after successful API responses.
-6. Settings → **Import browser backup** posts localStorage drafts/subscribers to `/api/import/local-backup`.
+1. User saves a campaign draft to MongoDB
+2. `POST /api/campaigns/:id/send-test` (CSRF + auth + rate limit) emails the owner only
+3. `POST /api/campaigns/:id/schedule` stores snapshot + UTC time
+4. Scheduler claims due rows and calls Resend with an idempotency key
+5. `POST /api/schedules/:id/cancel` cancels while still `Scheduled`
 
 ## Notes
 
-- Demo campaigns stay client-side sample data and are never written to MongoDB.
-- Subscriber emails are unique per account; CSV import never auto-resubscribes unsubscribed addresses.
-- Ownerless database records are preserved until you run the ownership migration command.
-- Email delivery and scheduling are not implemented yet.
+- Demo campaigns stay client-side sample data and are never emailed from MongoDB
+- Subscriber-wide delivery is not implemented yet

@@ -43,6 +43,13 @@ async function ensureIndexes(database) {
     { key: { userId: 1, emailKey: 1 }, unique: true },
     { key: { userId: 1, dateAdded: -1 } },
   ])
+
+  await database.collection('schedules').createIndexes([
+    { key: { status: 1, scheduledFor: 1 } },
+    { key: { userId: 1, scheduledFor: 1 } },
+    { key: { campaignId: 1 } },
+    { key: { idempotencyKey: 1 }, unique: true },
+  ])
 }
 
 export async function pingDb() {

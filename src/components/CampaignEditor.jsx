@@ -1,6 +1,7 @@
 import { useId, useState } from 'react'
 import MessageEditor from './MessageEditor.jsx'
 import CampaignPreviewPane from './CampaignPreviewPane.jsx'
+import CampaignDeliveryPanel from './CampaignDeliveryPanel.jsx'
 import './CampaignEditor.css'
 
 function CampaignEditor({
@@ -211,6 +212,16 @@ function CampaignEditor({
           </div>
         </div>
       </form>
+
+      {!isDemo ? (
+        <CampaignDeliveryPanel
+          campaign={{
+            id: initialCampaign?.id,
+            name: initialCampaign?.name || name,
+            subject: initialCampaign?.subject || subject,
+          }}
+        />
+      ) : null}
     </section>
   )
 }

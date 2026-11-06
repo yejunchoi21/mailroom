@@ -8,6 +8,8 @@ import authRoutes from './routes/auth.js'
 import campaignRoutes from './routes/campaigns.js'
 import subscriberRoutes from './routes/subscribers.js'
 import importRoutes from './routes/import.js'
+import deliveryRoutes from './routes/delivery.js'
+import { startScheduler, stopScheduler } from './services/scheduler.js'
 
 const app = express()
 const port = Number(process.env.PORT) || 3002
@@ -46,10 +48,13 @@ app.use('/api/auth', authRoutes)
 app.use('/api/campaigns', campaignRoutes)
 app.use('/api/subscribers', subscriberRoutes)
 app.use('/api/import', importRoutes)
+app.use('/api', deliveryRoutes)
 
 app.use((error, _req, res, _next) => {
   console.error(error)
-  res.status(500).json({ error: 'Internal server error.' })
+  const message = error.message || 'Internal server error.'
+  const status = /RESEND_|Resend|not configured/i.test(message) ? 503 : 500
+  res.status(status).json({ error: message })
 })
 
 app.use((_req, res) => {
@@ -57,12 +62,14 @@ app.use((_req, res) => {
 })
 
 await connectDb()
+startScheduler()
 
 const server = app.listen(port, () => {
   console.log(`Mailroom API listening on http://localhost:${port}`)
 })
 
 async function shutdown() {
+  stopScheduler()
   server.close()
   await closeDb()
   process.exit(0)
